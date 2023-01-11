@@ -288,7 +288,11 @@ class MapFragment : Fragment() {
                 for (marker in listMarkersTriangle) {
                     binding.mapView.overlays.remove(marker)
                 }
-                binding.mapView.invalidate()
+                // тут написать удаление всех листов с другими маркерами
+                
+
+
+                binding.mapView.invalidate() // разобраться с методом
                 listMarkersCam.clear()
                 listMarkersTriangle.clear()
             }

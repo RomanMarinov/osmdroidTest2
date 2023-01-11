@@ -34,14 +34,10 @@ class MapViewModel @Inject constructor(private val iRepository: IRepository) : V
     private var _mapOffice: MutableLiveData<List<MarkerOffice>> = MutableLiveData()
     val mapOffice: LiveData<List<MarkerOffice>> = _mapOffice
 
-    private var _flagCityCams = false
-    private var _flagDomofonCams = false
-    private var _flagOutDoorCams = false
-    private var _flagOffice = false
-
-//    private var _selectedCity: MutableStateFlow<Int?> = MutableStateFlow(null)
-//    val selectedCity: StateFlow<Int?> = _selectedCity
-
+    private var _emptyCityCams = false
+    private var _emptyDomofonCams = false
+    private var _emptyOutDoorCams = false
+    private var _emptyOffice = false
 
     private var _setLocation: MutableStateFlow<Location?> = MutableStateFlow(
         Location(
@@ -104,137 +100,76 @@ class MapViewModel @Inject constructor(private val iRepository: IRepository) : V
         _setLocation.value = location
     }
 
-    fun onClickCategory(position: Int) { // слишком много if ИСПРАВИТЬ!!!!!!!!!!!!!!!
-        // при каждом клике перестраивать все маркеры карты
-
+    fun onClickCategory(position: Int) {
         val category = _mapCategories.value?.let { it[position].title }
 
-        if (category.equals("Городские камеры")) {
-            if (_flagCityCams) {
-                _flagCityCams = false
-                _mapCityCams.postValue(emptyList())
-            } else {
+        when(category) {
+            "Городские камеры" -> {
+                if (_emptyCityCams) {
+                    _emptyCityCams = false
+                    _mapCityCams.postValue(emptyList())
+                } else {
+                    _emptyCityCams = true
+                    fillingMapCams()
+                }
+            }
 
-                if (_flagOutDoorCams) { // отображение первым 4
+            "Дворовые камеры" -> {
+                if (_emptyOutDoorCams) {
+                    _emptyOutDoorCams = false
                     _mapOutDoorCams.postValue(emptyList())
-                    _data.value?.let {
-                        _mapOutDoorCams.postValue(it.mapMarkers.outdoorCams.markers)
-                    }
+                } else {
+                    _emptyOutDoorCams = true
+                    fillingMapCams()
                 }
+            }
 
-                if (_flagDomofonCams) { // отображение вторым 3
+            "Домофоны" -> {
+                if (_emptyDomofonCams) {
+                    _emptyDomofonCams = false
                     _mapDomofonCams.postValue(emptyList())
-                    _data.value?.let {
-                        _mapDomofonCams.postValue(it.mapMarkers.domofonCams.markers)
-                    }
+                } else {
+                    _emptyDomofonCams = true
+                    fillingMapCams()
                 }
+            }
 
-                _flagCityCams = true // отображение третим 2
-                _data.value?.let {
-                    _mapCityCams.postValue(it.mapMarkers.cityCams.markers)
-                }
-
-                if (_flagOffice) { // отображение последним 1
+            "Офисы" -> {
+                if (_emptyOffice) {
+                    _emptyOffice = false
                     _mapOffice.postValue(emptyList())
-                    _data.value?.let {
-                        _mapOffice.postValue(it.mapMarkers.officeCams.markers)
-                    }
+                } else {
+                    _emptyOffice = true
+                    fillingMapCams()
                 }
             }
         }
-
-
-
-
-
-        if (category.equals("Офисы")) {
-            if (_flagOffice) {
-                _flagOffice = false
-                _mapOffice.postValue(emptyList())
-            } else {
-
-
-                _flagOffice = true
-                _data.value?.let {
-                    _mapOffice.postValue(it.mapMarkers.officeCams.markers)
-                }
-
-            }
-        }
-
-
-        if (category.equals("Дворовые камеры")) {
-            if (_flagOutDoorCams) {
-                _flagOutDoorCams = false
-                _mapOutDoorCams.postValue(emptyList())
-            } else {
-
-                _flagOutDoorCams = true
-                _data.value?.let {
-                    _mapOutDoorCams.postValue(it.mapMarkers.outdoorCams.markers)
-                }
-
-                if (_flagDomofonCams) { // отображение вторым 3
-                    _mapDomofonCams.postValue(emptyList())
-                    _data.value?.let {
-                        _mapDomofonCams.postValue(it.mapMarkers.domofonCams.markers)
-                    }
-                }
-
-                if (_flagCityCams) { // отображение третим 2
-                    _data.value?.let {
-                        _mapCityCams.postValue(it.mapMarkers.cityCams.markers)
-                    }
-                }
-
-                if (_flagOffice) { // отображение последним 1
-                    _mapOffice.postValue(emptyList())
-                    _data.value?.let {
-                        _mapOffice.postValue(it.mapMarkers.officeCams.markers)
-                    }
-                }
-
-
-
-            }
-        }
-        if (category.equals("Домофоны")) {
-            if (_flagDomofonCams) {
-                _flagDomofonCams = false
-                _mapDomofonCams.postValue(emptyList())
-            } else {
-
-                if (_flagOutDoorCams) { // отображение четвертым на карте, 1й в очереди
-                    _data.value?.let {
-                        _mapOutDoorCams.postValue(it.mapMarkers.outdoorCams.markers)
-                    }
-                }
-
-                _flagDomofonCams = true // отображение третим на карте, 2й в очереди
-                _data.value?.let {
-                    _mapDomofonCams.postValue(it.mapMarkers.domofonCams.markers)
-                }
-
-                if (_flagCityCams) { // отображение вторым на карте, 3й в очереди
-                    _data.value?.let {
-                        _mapCityCams.postValue(it.mapMarkers.cityCams.markers)
-                    }
-                }
-
-                if (_flagOffice) {  // отображение перым на карте, 4й в очереди
-                    _mapOffice.postValue(emptyList())
-                    _data.value?.let {
-                        _mapOffice.postValue(it.mapMarkers.officeCams.markers)
-                    }
-                }
-
-
-
-
-            }
-        }
-
     }
 
-
+    private fun fillingMapCams() {
+        if (_emptyOutDoorCams) { // очередь первая - 1й слой на карте
+            _mapOutDoorCams.postValue(emptyList())
+            _data.value?.let {
+                _mapOutDoorCams.postValue(it.mapMarkers.outdoorCams.markers)
+            }
+        }
+        if (_emptyDomofonCams) { // очередь вторая - 2й слой на карте
+            _mapDomofonCams.postValue(emptyList())
+            _data.value?.let {
+                _mapDomofonCams.postValue(it.mapMarkers.domofonCams.markers)
+            }
+        }
+        if (_emptyCityCams) { // очередь третья - 3й слой на карте
+            _mapCityCams.postValue(emptyList())
+            _data.value?.let {
+                _mapCityCams.postValue(it.mapMarkers.cityCams.markers)
+            }
+        }
+        if (_emptyOffice) { // очередь четвертая - 4й слой на карте
+            _mapOffice.postValue(emptyList())
+            _data.value?.let {
+                _mapOffice.postValue(it.mapMarkers.officeCams.markers)
+            }
+        }
+    }
 }
