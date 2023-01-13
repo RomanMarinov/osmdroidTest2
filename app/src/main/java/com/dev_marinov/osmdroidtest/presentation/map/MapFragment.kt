@@ -239,7 +239,7 @@ class MapFragment : Fragment() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.countMethod.collect {
 
-                    setZoomLocation(16, Location.center)
+                    //setZoomLocation(16, Location.center)
                 }
             }
         }
