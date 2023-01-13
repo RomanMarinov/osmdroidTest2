@@ -22,22 +22,33 @@ class MapViewModel @Inject constructor(private val iRepository: IRepository) : V
     private var _mapCategories: MutableLiveData<List<CityCam>> = MutableLiveData()
     val mapCategories: LiveData<List<CityCam>> = _mapCategories
 
-    private var _mapCityCams: MutableLiveData<List<MarkerCityCam>> = MutableLiveData()
-    val mapCityCams: LiveData<List<MarkerCityCam>> = _mapCityCams
+    private var _mapCityCams: MutableStateFlow<List<MarkerCityCam>> = MutableStateFlow(emptyList())
+    val mapCityCams: StateFlow<List<MarkerCityCam>> = _mapCityCams
 
-    private var _mapDomofonCams: MutableLiveData<List<MarkerDomofonCam>> = MutableLiveData()
-    val mapDomofonCams: LiveData<List<MarkerDomofonCam>> = _mapDomofonCams
+    private var _mapDomofonCams: MutableStateFlow<List<MarkerDomofonCam>> =
+        MutableStateFlow(emptyList())
+    val mapDomofonCams: StateFlow<List<MarkerDomofonCam>> = _mapDomofonCams
 
-    private var _mapOutDoorCams: MutableLiveData<List<MarkerOutdoorCam>> = MutableLiveData()
-    val mapOutDoorCams: LiveData<List<MarkerOutdoorCam>> = _mapOutDoorCams
+    private var _mapOutDoorCams: MutableStateFlow<List<MarkerOutdoorCam>> =
+        MutableStateFlow(emptyList())
+    val mapOutDoorCams: StateFlow<List<MarkerOutdoorCam>> = _mapOutDoorCams
 
-    private var _mapOffice: MutableLiveData<List<MarkerOffice>> = MutableLiveData()
-    val mapOffice: LiveData<List<MarkerOffice>> = _mapOffice
+    private var _mapOffice: MutableStateFlow<List<MarkerOffice>> = MutableStateFlow(emptyList())
+    val mapOffice: StateFlow<List<MarkerOffice>> = _mapOffice
 
-    private var _emptyCityCams = false
-    private var _emptyDomofonCams = false
-    private var _emptyOutDoorCams = false
-    private var _emptyOffice = false
+    private var _countZoom: MutableStateFlow<Int> = MutableStateFlow(0)
+    val countZoom: StateFlow<Int> = _countZoom
+
+
+    private var _countMethod: MutableStateFlow<Int> = MutableStateFlow(0)
+    val countMethod: StateFlow<Int> = _countMethod
+
+
+    private var _isEmptyCityCams = true
+    private var _isEmptyDomofonCams = true
+    private var _isEmptyOutDoorCams = true
+    private var _isEmptyOffice = true
+    private var _cZoom = 0
 
     private var _setLocation: MutableStateFlow<Location?> = MutableStateFlow(
         Location(
@@ -103,43 +114,43 @@ class MapViewModel @Inject constructor(private val iRepository: IRepository) : V
     fun onClickCategory(position: Int) {
         val category = _mapCategories.value?.let { it[position].title }
 
-        when(category) {
+        when (category) {
             "Городские камеры" -> {
-                if (_emptyCityCams) {
-                    _emptyCityCams = false
-                    _mapCityCams.postValue(emptyList())
+                if (!_isEmptyCityCams) {
+                    _mapCityCams.value = emptyList()
+                    _isEmptyCityCams = true
                 } else {
-                    _emptyCityCams = true
+                    _isEmptyCityCams = false
                     fillingMapCams()
                 }
             }
 
             "Дворовые камеры" -> {
-                if (_emptyOutDoorCams) {
-                    _emptyOutDoorCams = false
-                    _mapOutDoorCams.postValue(emptyList())
+                if (!_isEmptyOutDoorCams) {
+                    _mapOutDoorCams.value = emptyList()
+                    _isEmptyOutDoorCams = true
                 } else {
-                    _emptyOutDoorCams = true
+                    _isEmptyOutDoorCams = false
                     fillingMapCams()
                 }
             }
 
             "Домофоны" -> {
-                if (_emptyDomofonCams) {
-                    _emptyDomofonCams = false
-                    _mapDomofonCams.postValue(emptyList())
+                if (!_isEmptyDomofonCams) {
+                    _mapDomofonCams.value = emptyList()
+                    _isEmptyDomofonCams = true
                 } else {
-                    _emptyDomofonCams = true
+                    _isEmptyDomofonCams = false
                     fillingMapCams()
                 }
             }
 
             "Офисы" -> {
-                if (_emptyOffice) {
-                    _emptyOffice = false
-                    _mapOffice.postValue(emptyList())
+                if (!_isEmptyOffice) {
+                    _mapOffice.value = emptyList()
+                    _isEmptyOffice = true
                 } else {
-                    _emptyOffice = true
+                    _isEmptyOffice = false
                     fillingMapCams()
                 }
             }
@@ -147,29 +158,41 @@ class MapViewModel @Inject constructor(private val iRepository: IRepository) : V
     }
 
     private fun fillingMapCams() {
-        if (_emptyOutDoorCams) { // очередь первая - 1й слой на карте
-            _mapOutDoorCams.postValue(emptyList())
+        if (!_isEmptyOutDoorCams) { // очередь первая - 1й слой наложения на карте
+            _mapOutDoorCams.value = emptyList()
             _data.value?.let {
-                _mapOutDoorCams.postValue(it.mapMarkers.outdoorCams.markers)
+                _mapOutDoorCams.value = it.mapMarkers.outdoorCams.markers
             }
         }
-        if (_emptyDomofonCams) { // очередь вторая - 2й слой на карте
-            _mapDomofonCams.postValue(emptyList())
+        if (!_isEmptyDomofonCams) { // очередь вторая - 2й слой наложения на карте
+            _mapDomofonCams.value = emptyList()
             _data.value?.let {
-                _mapDomofonCams.postValue(it.mapMarkers.domofonCams.markers)
+                _mapDomofonCams.value = it.mapMarkers.domofonCams.markers
             }
         }
-        if (_emptyCityCams) { // очередь третья - 3й слой на карте
-            _mapCityCams.postValue(emptyList())
+        if (!_isEmptyCityCams) { // очередь третья - 3й слой наложения на карте
+            _mapCityCams.value = emptyList()
             _data.value?.let {
-                _mapCityCams.postValue(it.mapMarkers.cityCams.markers)
+                _mapCityCams.value = it.mapMarkers.cityCams.markers
             }
         }
-        if (_emptyOffice) { // очередь четвертая - 4й слой на карте
-            _mapOffice.postValue(emptyList())
+        if (!_isEmptyOffice) { // очередь четвертая - 4й слой наложения на карте
+            _mapOffice.value = emptyList()
             _data.value?.let {
-                _mapOffice.postValue(it.mapMarkers.officeCams.markers)
+                _mapOffice.value = it.mapMarkers.officeCams.markers
             }
         }
+    }
+
+    fun clickCountZoom(one: String) {
+        if (one.toInt() > 0) {
+            _countZoom.value = _cZoom++
+        } else {
+            _countZoom.value = _cZoom--
+        }
+    }
+
+    fun method(i: Int, center: String) {
+        _countMethod.value = i
     }
 }
