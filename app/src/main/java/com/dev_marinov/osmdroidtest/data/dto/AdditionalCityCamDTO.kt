@@ -14,6 +14,8 @@ data class AdditionalCityCamDTO(
     val location: String,
     @SerializedName("locationTitle")
     val locationTitle: String,
+    @SerializedName("previewUrl")
+    val previewUrl: String,
     @SerializedName("server")
     val server: String,
     @SerializedName("token")
@@ -27,7 +29,8 @@ data class AdditionalCityCamDTO(
             location = location,
             locationTitle = location,
             server = server,
-            token = token
+            token = token,
+            previewUrl = previewUrl
         )
     }
 }

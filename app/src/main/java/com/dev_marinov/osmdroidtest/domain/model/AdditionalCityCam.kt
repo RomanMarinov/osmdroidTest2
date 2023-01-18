@@ -6,6 +6,7 @@ data class AdditionalCityCam(
     val dtpCounts: Int,
     val location: String,
     val locationTitle: String,
+    val previewUrl: String,
     val server: String,
     val token: String
 )

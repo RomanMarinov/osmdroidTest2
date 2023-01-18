@@ -9,7 +9,7 @@
     >
     <TextView
         android:id="@+id/textView"
-        android:layout_width="120dp"
+        android:layout_width="150dp"
         android:layout_height="40dp"
         android:ellipsize="marquee"
         android:textSize="16sp"

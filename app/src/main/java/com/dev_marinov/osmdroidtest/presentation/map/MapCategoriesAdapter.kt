@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.dev_marinov.osmdroidtest.databinding.ItemMapInfoBinding
+import com.dev_marinov.osmdroidtest.databinding.ItemCategoriesBinding
 import com.dev_marinov.osmdroidtest.domain.model.CityCam
 
 class MapCategoriesAdapter(private val onClickCategory: (id: Int) -> Unit) :
@@ -15,8 +15,8 @@ class MapCategoriesAdapter(private val onClickCategory: (id: Int) -> Unit) :
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        val listItemBinding = ItemMapInfoBinding.inflate(inflater, parent, false)
-        return ViewHolder(listItemBinding, onClickCategory)
+        val listItemBinding = ItemCategoriesBinding.inflate(inflater, parent, false)
+        return ViewHolder(listItemBinding)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -32,10 +32,9 @@ class MapCategoriesAdapter(private val onClickCategory: (id: Int) -> Unit) :
         return mapCategories.size
     }
 
-    inner class ViewHolder(private val binding: ItemMapInfoBinding, onClick: (id: Int) -> Unit) :
+    inner class ViewHolder(private val binding: ItemCategoriesBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(mapCategories: CityCam) {
-
 
             binding.tvItem.text = mapCategories.title
             binding.tvValue.text = mapCategories.count.toString()
@@ -45,7 +44,6 @@ class MapCategoriesAdapter(private val onClickCategory: (id: Int) -> Unit) :
             }
         }
     }
-
 }
 
 class DetailDiffUtilCallback : DiffUtil.ItemCallback<CityCam>() {

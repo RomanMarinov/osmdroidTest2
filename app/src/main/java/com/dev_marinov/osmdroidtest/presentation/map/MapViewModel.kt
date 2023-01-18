@@ -4,6 +4,7 @@ import androidx.lifecycle.*
 import com.dev_marinov.osmdroidtest.data.Constants
 import com.dev_marinov.osmdroidtest.domain.IRepository
 import com.dev_marinov.osmdroidtest.domain.model.*
+import com.dev_marinov.osmdroidtest.presentation.model.GeoPointScreen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,19 +37,16 @@ class MapViewModel @Inject constructor(private val iRepository: IRepository) : V
     private var _mapOffice: MutableStateFlow<List<MarkerOffice>> = MutableStateFlow(emptyList())
     val mapOffice: StateFlow<List<MarkerOffice>> = _mapOffice
 
-    private var _countZoom: MutableStateFlow<Int> = MutableStateFlow(0)
-    val countZoom: StateFlow<Int> = _countZoom
-
-
-    private var _countMethod: MutableStateFlow<Int> = MutableStateFlow(0)
-    val countMethod: StateFlow<Int> = _countMethod
-
+    private var _currentZoomNew: MutableStateFlow<GeoPointScreen> = MutableStateFlow(GeoPointScreen(
+        zoom = Constants.DefaultGeoPointScreen.ZOOM,
+        location = Constants.DefaultGeoPointScreen.LOCATION
+    ))
+    val currentZoomNew: StateFlow<GeoPointScreen> = _currentZoomNew
 
     private var _isEmptyCityCams = true
     private var _isEmptyDomofonCams = true
     private var _isEmptyOutDoorCams = true
     private var _isEmptyOffice = true
-    private var _cZoom = 0
 
     private var _setLocation: MutableStateFlow<Location?> = MutableStateFlow(
         Location(
@@ -184,15 +182,8 @@ class MapViewModel @Inject constructor(private val iRepository: IRepository) : V
         }
     }
 
-    fun clickCountZoom(one: String) {
-        if (one.toInt() > 0) {
-            _countZoom.value = _cZoom++
-        } else {
-            _countZoom.value = _cZoom--
-        }
+    fun clickCountZoom(zoom: Double, getLocationScreen: String) {
+        _currentZoomNew.value = GeoPointScreen(zoom = zoom, location = getLocationScreen)
     }
 
-    fun method(i: Int, center: String) {
-        _countMethod.value = i
-    }
 }

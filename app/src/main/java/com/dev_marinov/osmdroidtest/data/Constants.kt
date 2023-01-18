@@ -13,4 +13,8 @@ object Constants {
         const val TITLE = "Вологда"
     }
 
+    object DefaultGeoPointScreen {
+        const val ZOOM = 0.0
+        const val LOCATION = ""
+    }
 }
