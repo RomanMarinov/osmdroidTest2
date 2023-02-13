@@ -13,4 +13,14 @@
 
     <string name="i_am">Я</string>
 
+
+    <string name="route" translatable="false">Маршрут</string>
+    <string name="retry" translatable="false">Повторить</string>
+    <string name="descripIntercom" translatable="false">Умный домофон - это сервис, который расширит функционал вашего обычного домофона: \n- вы будете видеть кто вам звонит,\n- у вас появится возможность открыть дверь дистанционно.</string>
+
+    <string name="onTheDesktop" translatable="false">На рабочий стол</string>
+
+    <string name="favorite" translatable="false">В избранное</string>
+    <string name="call" translatable="false">Позвонить</string>
+
 </resources>

@@ -80,14 +80,6 @@ class MapViewModel @Inject constructor(private val iRepository: IRepository) : V
         }
     }
 
-    private suspend fun getLocationTitle() {
-        delay(100)
-        val list: MutableList<String> = mutableListOf()
-        val data = _data.value?.locations
-        data?.map { list.add(it.title) }
-        _locationsTitle.postValue(list)
-    }
-
     private suspend fun getMapCategories() {
         delay(100)
         // в виду не совсем удобного json пришлось сделать так
@@ -99,6 +91,14 @@ class MapViewModel @Inject constructor(private val iRepository: IRepository) : V
             list.add(3, CityCam(it.mapMarkers.officeCams.title, it.mapMarkers.officeCams.count))
             _mapCategories.postValue(list)
         }
+    }
+
+    private suspend fun getLocationTitle() {
+        delay(100)
+        val list: MutableList<String> = mutableListOf()
+        val data = _data.value?.locations
+        data?.map { list.add(it.title) }
+        _locationsTitle.postValue(list)
     }
 
     suspend fun onClick(position: Int) {
@@ -185,5 +185,6 @@ class MapViewModel @Inject constructor(private val iRepository: IRepository) : V
     fun clickCountZoom(zoom: Double, getLocationScreen: String) {
         _currentZoomNew.value = GeoPointScreen(zoom = zoom, location = getLocationScreen)
     }
+
 
 }

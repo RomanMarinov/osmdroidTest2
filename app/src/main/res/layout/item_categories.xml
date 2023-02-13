@@ -11,7 +11,7 @@
         android:layout_marginStart="5dp"
         android:layout_marginBottom="10dp"
         android:padding="10dp"
-        android:background="@drawable/background_item_info"
+        android:background="@drawable/background_views_map"
         >
 
 

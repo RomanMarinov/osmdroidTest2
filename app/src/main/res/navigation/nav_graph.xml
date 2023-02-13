@@ -8,5 +8,17 @@
     <fragment
         android:id="@+id/mapFragment"
         android:name="com.dev_marinov.osmdroidtest.presentation.map.MapFragment"
-        android:label="MapFragment" />
+        android:label="MapFragment" >
+        <action
+            android:id="@+id/action_mapFragment_to_cameraDialogFragment"
+            app:destination="@id/cameraDialogFragment" />
+    </fragment>
+    <dialog
+        android:id="@+id/cameraDialogFragment"
+        android:name="com.dev_marinov.osmdroidtest.presentation.cameraDialog.CameraDialogFragment"
+        android:label="CameraDialogFragment" >
+        <argument
+            android:name="navigationArgs"
+            app:argType="com.dev_marinov.osmdroidtest.presentation.model.CameraNavigationArgs" />
+    </dialog>
 </navigation>

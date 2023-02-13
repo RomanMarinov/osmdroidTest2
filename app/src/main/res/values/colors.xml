@@ -9,6 +9,12 @@
     <color name="white">#FFFFFFFF</color>
     <color name="green">#07FF00</color>
 
+    <color name="light_grey">#B3B3B3</color>
+
     <color name="transparent_item_map_info">#8823292B</color>
     <color name="value_item_map_info">#8820FF00</color>
+
+    <color name="baza_net_orange">#C86464</color>
+    <color name="baza_net_main_color">#4B8CA0</color>
+
 </resources>

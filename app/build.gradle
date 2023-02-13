@@ -4,6 +4,7 @@ plugins {
     id 'kotlin-kapt'
     id 'androidx.navigation.safeargs.kotlin'
     id 'dagger.hilt.android.plugin'
+    id 'kotlin-parcelize'
 }
 
 android {
@@ -34,6 +35,10 @@ android {
         jvmTarget = '1.8'
     }
 
+    buildFeatures{
+        viewBinding true
+    }
+
     dataBinding{
         enabled true
     }
@@ -57,12 +62,29 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.0'
 
     // UI
+   // implementation 'com.google.android.material:material:1.8.0'
+  //  implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+   // implementation "androidx.recyclerview:recyclerview:1.2.1"
+ //   implementation 'com.squareup.picasso:picasso:2.71828'
+   // implementation 'androidx.cardview:cardview:1.0.0'
+  //  implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+
+
+    implementation "androidx.activity:activity-ktx:1.6.1"
+    implementation "androidx.fragment:fragment-ktx:1.5.5"
     implementation 'com.google.android.material:material:1.7.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation "androidx.recyclerview:recyclerview:1.2.1"
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    implementation 'com.facebook.shimmer:shimmer:0.5.0'
+    implementation('com.wdullaer:materialdatetimepicker:4.2.3') {
+        exclude group: 'androidx.appcompat'
+        exclude group: 'androidx.recyclerview'
+    }
+
+
 
     // Асинхронный поток WindowMetrics: чтобы получать уведомления от библиотеки при изменении размера окна,
     // независимо от того, вызывает ли это изменение изменение конфигурации.

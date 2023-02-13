@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+
+    >
+
+    <data>
+
+    </data>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clMain"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context="."
+      >
+
+        <include
+            android:id="@+id/layoutOutDoor"
+            layout="@layout/layout_out_door"
+            android:visibility="gone"
+            />
+
+        <include
+            android:id="@+id/layoutCity"
+            layout="@layout/layout_city"
+            android:visibility="gone"
+
+            />
+
+        <include
+            android:id="@+id/layoutDomofon"
+            layout="@layout/layout_domofon"
+            android:visibility="gone"
+            />
+
+        <include
+            android:id="@+id/layoutOffice"
+            layout="@layout/layout_office"
+            android:visibility="gone"
+            />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btRetry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/retry"
+            android:padding="10dp"
+            android:textAllCaps="false"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

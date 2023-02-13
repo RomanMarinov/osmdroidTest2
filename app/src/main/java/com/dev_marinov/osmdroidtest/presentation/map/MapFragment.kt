@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.location.*
+import android.location.Location
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -25,13 +26,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.dev_marinov.osmdroidtest.R
 import com.dev_marinov.osmdroidtest.databinding.FragmentMapBinding
-import com.dev_marinov.osmdroidtest.domain.model.MarkerCityCam
-import com.dev_marinov.osmdroidtest.domain.model.MarkerDomofonCam
-import com.dev_marinov.osmdroidtest.domain.model.MarkerOffice
-import com.dev_marinov.osmdroidtest.domain.model.MarkerOutdoorCam
+import com.dev_marinov.osmdroidtest.domain.model.*
+import com.dev_marinov.osmdroidtest.presentation.model.CameraNavigationArgs
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.AndroidEntryPoint
@@ -131,7 +131,7 @@ class MapFragment : Fragment() {
         binding.codeSpinner.setPopupBackgroundDrawable(
             ResourcesCompat.getDrawable(
                 binding.root.resources,
-                R.drawable.background_item_info,
+                R.drawable.background_views_map,
                 null
             )
         )
@@ -158,7 +158,7 @@ class MapFragment : Fragment() {
 
 
     private fun setMapView() {
-       // binding.mapView.setTileSource(TileSourceFactory.MAPNIK);
+        // binding.mapView.setTileSource(TileSourceFactory.MAPNIK);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             requestPermissions(
                 arrayOf(
@@ -223,44 +223,6 @@ class MapFragment : Fragment() {
 
         lifecycleScope.launchWhenStarted {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.mapCityCams.collect {
-                    var markerCityCam: Marker? = null
-                    for (cityCam in it) {
-
-                        markerCityCam = Marker(binding.mapView) // маркер камеры
-
-                        val geoPoint = GeoPoint(cityCam.latitude, cityCam.longitude)
-                        val iconId = resources.getDrawable(R.drawable.ic_map_city_cam)
-                        val title = cityCam.title
-
-                        setMarkerParams(marker = markerCityCam, geoPoint = geoPoint, iconId = iconId, title = title)
-
-                        markerCityTriangle = Marker(binding.mapView) // маркер угла // маркер угла должен быть первый добавлен
-
-                        binding.mapView.overlays.add(markerCityTriangle)
-                        // маркер камер должен быть вторым установлен (т.е. поверх первого)
-                        binding.mapView.overlays.add(markerCityCam)
-                        binding.mapView.invalidate() // перерисовка из главного потока // postInvalidate из фонового
-
-                        showInfoMarkerWindow(markerCityCam)
-
-                        listMarkersCityCam.add(markerCityCam) // список для только для удаления маркеров markerCams
-                        listMarkersCityTriangle.add(markerCityTriangle)
-                        listCityCam.add(cityCam)
-                    }
-
-                    closeInfoMarkerWindow(markerCityCam)
-
-                    removeMarkers(it, listMarkersCityCam)
-                    removeMarkers(it, listMarkersCityTriangle)
-
-                    setIconMarkerMap(binding.mapView.zoomLevel.toDouble())
-                }
-            }
-        }
-
-        lifecycleScope.launchWhenStarted {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.mapOutDoorCams.collect {
                     var markerOutDoorCam: Marker? = null
                     for (outDoorCam in it) {
@@ -272,12 +234,17 @@ class MapFragment : Fragment() {
                         val iconId = resources.getDrawable(R.drawable.ic_map_outdoor)
                         val title = outDoorCam.title
 
-                        setMarkerParams(marker = markerOutDoorCam, geoPoint = geoPoint, iconId = iconId, title = title)
+                        setMarkerParams(
+                            marker = markerOutDoorCam,
+                            geoPoint = geoPoint,
+                            iconId = iconId,
+                            title = title
+                        )
 
                         binding.mapView.overlays.add(markerOutDoorCam)
                         binding.mapView.invalidate() // перерисовка из главного потока // postInvalidate из фонового
 
-                        showInfoMarkerWindow(markerOutDoorCam)
+                        showInfoMarkerWindow(markerOutDoorCam, outDoorCam)
 
                         listMarkersOutDoor.add(markerOutDoorCam) // список для только для удаления маркеров markerCams
                         listOutDoorCam.add(outDoorCam)
@@ -302,12 +269,17 @@ class MapFragment : Fragment() {
                         val iconId = resources.getDrawable(R.drawable.ic_map_domofon)
                         val title = domofonCam.title
 
-                        setMarkerParams(marker = markerDomofonCam, geoPoint = geoPoint, iconId = iconId, title = title)
+                        setMarkerParams(
+                            marker = markerDomofonCam,
+                            geoPoint = geoPoint,
+                            iconId = iconId,
+                            title = title
+                        )
 
                         binding.mapView.overlays.add(markerDomofonCam)
                         binding.mapView.invalidate() // перерисовка из главного потока // postInvalidate из фонового
 
-                        showInfoMarkerWindow(markerDomofonCam)
+                        showInfoMarkerWindow(markerDomofonCam, domofonCam)
 
                         listMarkersDomofon.add(markerDomofonCam) // список для только для удаления маркеров markerCams
                         listDomofonCam.add(domofonCam)
@@ -323,6 +295,51 @@ class MapFragment : Fragment() {
 
         lifecycleScope.launchWhenStarted {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.mapCityCams.collect {
+                    var markerCityCam: Marker? = null
+                    for (cityCam in it) {
+
+                        markerCityCam = Marker(binding.mapView) // маркер камеры
+
+                        val geoPoint = GeoPoint(cityCam.latitude, cityCam.longitude)
+                        val iconId = resources.getDrawable(R.drawable.ic_map_city_cam)
+                        val title = cityCam.title
+
+                        setMarkerParams(
+                            marker = markerCityCam,
+                            geoPoint = geoPoint,
+                            iconId = iconId,
+                            title = title
+                        )
+
+                        markerCityTriangle =
+                            Marker(binding.mapView) // маркер угла // маркер угла должен быть первый добавлен
+
+                        binding.mapView.overlays.add(markerCityTriangle)
+                        // маркер камер должен быть вторым установлен (т.е. поверх первого)
+                        binding.mapView.overlays.add(markerCityCam)
+                        binding.mapView.invalidate() // перерисовка из главного потока // postInvalidate из фонового
+
+                        showInfoMarkerWindow(markerCityCam, cityCam)
+
+                        listMarkersCityCam.add(markerCityCam) // список для только для удаления маркеров markerCams
+                        listMarkersCityTriangle.add(markerCityTriangle)
+                        listCityCam.add(cityCam)
+                    }
+
+                    closeInfoMarkerWindow(markerCityCam)
+
+                    removeMarkers(it, listMarkersCityCam)
+                    removeMarkers(it, listMarkersCityTriangle)
+
+                    setIconMarkerMap(binding.mapView.zoomLevel.toDouble())
+                }
+            }
+        }
+
+
+        lifecycleScope.launchWhenStarted {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.mapOffice.collect {
                     var markerOffice: Marker? = null
                     for (office in it) {
@@ -333,12 +350,17 @@ class MapFragment : Fragment() {
                         val iconId = resources.getDrawable(R.drawable.ic_map_office)
                         val title = office.title
 
-                        setMarkerParams(marker = markerOffice, geoPoint = geoPoint, iconId = iconId, title = title)
+                        setMarkerParams(
+                            marker = markerOffice,
+                            geoPoint = geoPoint,
+                            iconId = iconId,
+                            title = title
+                        )
 
                         binding.mapView.overlays.add(markerOffice)
                         binding.mapView.invalidate() // перерисовка из главного потока // postInvalidate из фонового
 
-                        showInfoMarkerWindow(markerOffice)
+                        showInfoMarkerWindow(markerOffice, office)
 
                         listMarkersOffice.add(markerOffice) // список для только для удаления маркеров markerCams
                         listOffice.add(office)
@@ -383,17 +405,62 @@ class MapFragment : Fragment() {
         binding.mapView.invalidate()
     }
 
-    private fun showInfoMarkerWindow(markerCam: Marker) {
+    private fun <T> showInfoMarkerWindow(markerCam: Marker, objectCam: T) {
         markerCam.setOnMarkerClickListener { marker, mapView ->
-            marker.showInfoWindow()
-
-            // реализовать только для cityCam и outDoorCam
-
-
-
-
-            false
+//            // реализовать только для cityCam и outDoorCam
+            if (objectCam is MarkerCityCam) {
+                moveToCameraDialogFragment(
+                    CameraNavigationArgs(
+                        cameraName = objectCam.additional.cameraName,
+                        cameraType = objectCam,
+                        address = "",
+                        worktime = "",
+                        visible = ""
+                    )
+                )
+            }
+            if (objectCam is MarkerOutdoorCam) {
+                moveToCameraDialogFragment(
+                    CameraNavigationArgs(
+                        cameraName = objectCam.additional.cameraName,
+                        cameraType = objectCam,
+                        address = "",
+                        worktime = "",
+                        visible = ""
+                    )
+                )
+            }
+            if (objectCam is MarkerOffice) {
+                moveToCameraDialogFragment(
+                    CameraNavigationArgs(
+                        cameraName = "",
+                        cameraType = objectCam,
+                        address = objectCam.additional.address,
+                        worktime = objectCam.additional.worktime,
+                        visible = objectCam.additional.phone.visible
+                    )
+                )
+            }
+            if (objectCam is MarkerDomofonCam) {
+                moveToCameraDialogFragment(
+                    CameraNavigationArgs(
+                        cameraName = "",
+                        cameraType = objectCam,
+                        address = objectCam.title,
+                        worktime = "",
+                        visible = ""
+                    )
+                )
+            }
+            //   marker.showInfoWindow()
+            true
         }
+    }
+
+    private fun moveToCameraDialogFragment(cameraNavigationArgs: CameraNavigationArgs) {
+        val action =
+            MapFragmentDirections.actionMapFragmentToCameraDialogFragment(cameraNavigationArgs)
+        findNavController().navigate(action)
     }
 
     private fun closeInfoMarkerWindow(markerCam: Marker?) {    // закрыть окно описания маркета
@@ -407,7 +474,7 @@ class MapFragment : Fragment() {
         })
     }
 
-    private fun <T>removeMarkers(markerCams: List<T>, listMarkersCam: MutableList<Marker>) {
+    private fun <T> removeMarkers(markerCams: List<T>, listMarkersCam: MutableList<Marker>) {
         if (markerCams.isEmpty()) {
             for (marker in listMarkersCam) {
                 binding.mapView.overlays.remove(marker)
@@ -448,7 +515,12 @@ class MapFragment : Fragment() {
         }
     }
 
-    private fun setMarkerParams(marker: Marker?, geoPoint: GeoPoint, iconId: Drawable, title: String) {
+    private fun setMarkerParams(
+        marker: Marker?,
+        geoPoint: GeoPoint,
+        iconId: Drawable,
+        title: String
+    ) {
         marker?.let {
             it.position = geoPoint
             it.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
